@@ -1,0 +1,59 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "System Uptime (Seconds)",
+      "type": "stat",
+      "targets": [{ "expr": "alphamind_uptime_seconds", "refId": "A" }]
+    },
+    {
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Total AUM ($)",
+      "type": "stat",
+      "targets": [{ "expr": "alphamind_total_aum_usd", "refId": "A" }]
+    },
+    {
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "Timeline Events Total",
+      "type": "stat",
+      "targets": [{ "expr": "alphamind_timeline_events_total", "refId": "A" }]
+    },
+    {
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Reasoning Records Stored",
+      "type": "stat",
+      "targets": [{ "expr": "alphamind_reasoning_records_total", "refId": "A" }]
+    },
+    {
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 8 },
+      "id": 5,
+      "title": "Virtual AI Fund AUM Evolution",
+      "type": "timeseries",
+      "targets": [{ "expr": "alphamind_fund_aum_usd", "refId": "A" }]
+    },
+    {
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "id": 6,
+      "title": "Sharpe Ratio by Fund",
+      "type": "timeseries",
+      "targets": [{ "expr": "alphamind_fund_sharpe_ratio", "refId": "A" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["alphamind", "staging", "telemetry"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "AlphaMind AI v2 — Mission Control Telemetry Dashboard"
+}

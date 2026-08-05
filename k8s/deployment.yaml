@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alphamind-backend
+  namespace: alphamind-staging
+  labels:
+    app: alphamind-backend
+    environment: staging
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: alphamind-backend
+  template:
+    metadata:
+      labels:
+        app: alphamind-backend
+        environment: staging
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/api/v1/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: alphamind-backend
+          image: alphamind/backend:v2.0.0-staging
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: alphamind-staging-config
+            - secretRef:
+                name: alphamind-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/livez
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/readyz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2

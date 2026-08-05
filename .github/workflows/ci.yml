@@ -1,0 +1,61 @@
+name: AlphaMind AI Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-quality-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black ruff mypy pytest pytest-asyncio httpx pydantic
+
+      - name: Code Formatting Check (Black)
+        run: black --check apps/backend packages
+
+      - name: Linting Check (Ruff)
+        run: ruff check apps/backend packages
+
+      - name: Static Type Safety Check (Mypy)
+        run: mypy apps/backend/app packages --ignore-missing-imports --explicit-package-bases
+
+      - name: Execute PyTest Suite
+        run: PYTHONPATH=. pytest
+
+  frontend-quality-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies
+        working-directory: apps/frontend
+        run: npm ci
+
+      - name: ESLint Check
+        working-directory: apps/frontend
+        run: npm run lint
+
+      - name: TypeScript Type-Check
+        working-directory: apps/frontend
+        run: npm run type-check
+
+      - name: Vitest Suite
+        working-directory: apps/frontend
+        run: npm test

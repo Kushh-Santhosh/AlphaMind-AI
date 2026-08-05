@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: alphamind-backend-staging
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://alphamind:staging_pass@postgres:5432/alphamind_staging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      - redis
+      - postgres
+
+  frontend:
+    build:
+      context: apps/frontend
+      dockerfile: Dockerfile
+    container_name: alphamind-frontend-staging
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: alphamind-redis-staging
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_staging_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: alphamind-postgres-staging
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=alphamind_staging
+      - POSTGRES_USER=alphamind
+      - POSTGRES_PASSWORD=staging_pass
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alphamind -d alphamind_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: alphamind-prometheus-staging
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_staging_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: alphamind-grafana-staging
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=staging_admin
+    volumes:
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_staging_data:/var/lib/grafana
+
+volumes:
+  redis_staging_data:
+  postgres_staging_data:
+  prometheus_staging_data:
+  grafana_staging_data:
