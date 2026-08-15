@@ -99,10 +99,19 @@ async def start_market_replay(
     ticks_count: int = 50,
 ) -> dict[str, Any]:
     """Start accelerated historical market replay simulation."""
-    ticks = replay_engine.run_replay(symbol, scenario, ticks_count)
+    ticks = await replay_engine.run_replay(symbol, scenario, ticks_count)
     return {
         "symbol": symbol.upper(),
         "scenario": scenario.value,
         "ticks_generated_count": len(ticks),
-        "ticks": [t.model_dump() for t in ticks],
+        "ticks": [
+            {
+                "timestamp_utc": t.timestamp_utc,
+                "symbol": t.symbol,
+                "price": t.price,
+                "volume": t.volume,
+                "event_flag": t.event_flag,
+            }
+            for t in ticks
+        ],
     }

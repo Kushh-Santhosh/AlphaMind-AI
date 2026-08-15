@@ -73,10 +73,11 @@ def test_portfolio_simulator_margin_and_pnl() -> None:
     assert sim.state.maintenance_margin_required_usd > 0.0
 
 
-def test_historical_market_replay_engine() -> None:
+@pytest.mark.asyncio
+async def test_historical_market_replay_engine() -> None:
     """Test MarketReplayEngine historical crash scenarios and tick generation."""
     replay = MarketReplayEngine(playback_speed_multiplier=10)
-    ticks = replay.run_replay("AAPL", ReplayScenario.FINANCIAL_CRISIS_2008, ticks_count=20)
+    ticks = await replay.run_replay("AAPL", ReplayScenario.FINANCIAL_CRISIS_2008, ticks_count=20)
 
     assert len(ticks) == 20
     assert ticks[0].symbol == "AAPL"

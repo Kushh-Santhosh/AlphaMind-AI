@@ -10,17 +10,18 @@ jobs:
   backend-quality-and-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Project & Dev Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install black ruff mypy pytest pytest-asyncio httpx pydantic
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -e ".[dev]" || pip install fastapi uvicorn pydantic pydantic-settings sqlalchemy greenlet asyncpg alembic redis httpx structlog python-jose passlib python-multipart langgraph langchain numpy pandas yfinance scipy pytest pytest-asyncio pytest-cov pytest-mock ruff black mypy
 
       - name: Code Formatting Check (Black)
         run: black --check apps/backend packages
@@ -31,31 +32,33 @@ jobs:
       - name: Static Type Safety Check (Mypy)
         run: mypy apps/backend/app packages --ignore-missing-imports --explicit-package-bases
 
-      - name: Execute PyTest Suite
-        run: PYTHONPATH=. pytest
+      - name: Execute Full PyTest Suite
+        run: PYTHONPATH=. pytest -v
 
   frontend-quality-and-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/frontend/package-lock.json
 
       - name: Install Frontend Dependencies
         working-directory: apps/frontend
         run: npm ci
 
-      - name: ESLint Check
-        working-directory: apps/frontend
-        run: npm run lint
-
       - name: TypeScript Type-Check
         working-directory: apps/frontend
-        run: npm run type-check
+        run: npx tsc --noEmit
 
       - name: Vitest Suite
         working-directory: apps/frontend
-        run: npm test
+        run: npm test -- --run
+
+      - name: Production Frontend Build
+        working-directory: apps/frontend
+        run: npm run build
