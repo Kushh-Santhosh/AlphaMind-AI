@@ -99,19 +99,39 @@ class DataProviderRegistry:
     def _normalize_symbol(self, symbol: str) -> str:
         """Map raw user symbols to canonical provider format."""
         s = symbol.strip().upper()
+        # Aliases mapping
+        alias_map = {
+            "WTI": "CL=F",
+            "CRUDE": "CL=F",
+            "CRUDEOIL": "CL=F",
+            "BRENT": "BZ=F",
+            "NATGAS": "NG=F",
+            "NATURALGAS": "NG=F",
+            "GOLD": "GC=F",
+            "SILVER": "SI=F",
+            "COPPER": "HG=F",
+            "SPX": "^GSPC",
+            "S&P500": "^GSPC",
+            "NDX": "^IXIC",
+            "NASDAQ": "^IXIC",
+            "NIFTY": "^NSEI",
+            "NIFTY50": "^NSEI",
+            "VIX": "^VIX",
+            "BITCOIN": "BTC-USD",
+            "ETHEREUM": "ETH-USD",
+            "SOLANA": "SOL-USD",
+        }
+        if s in alias_map:
+            return alias_map[s]
+
         crypto_set = {
             "BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "AVAX", "DOT", "LINK", "NEAR",
             "DOGE", "MATIC", "POL", "SHIB", "LTC", "BCH", "UNI", "ATOM", "XLM", "ICP"
         }
         if s in crypto_set or (s.endswith("USD") and not s.endswith("-USD") and len(s) > 4):
             return f"{s}-USD" if not s.endswith("-USD") else s
-        if s in ("BITCOIN", "BTC"):
-            return "BTC-USD"
-        if s in ("ETHEREUM", "ETH"):
-            return "ETH-USD"
-        if s in ("SOLANA", "SOL"):
-            return "SOL-USD"
-        if s.endswith(".NS") or s.endswith(".BO"):
+
+        if s.endswith(".NS") or s.endswith(".BO") or "=" in s or "^" in s:
             return s
         return s
 

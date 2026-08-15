@@ -16,6 +16,7 @@ import {
   Clock,
   Cpu,
   Download,
+  Eye,
   Flame,
   Globe,
   Layers,
@@ -28,6 +29,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+import InteractiveCandlestickChart from "@/components/charts/InteractiveCandlestickChart";
 
 interface PageProps {
   params: Promise<{ symbol: string }>;
@@ -39,7 +41,6 @@ type TabType =
   | "valuation"
   | "technicals"
   | "debate"
-  | "news"
   | "forecast"
   | "risk"
   | "evidence"
@@ -49,10 +50,12 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
   const resolvedParams = use(params);
   const symbol = (resolvedParams.symbol || "NVDA").toUpperCase();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [isProMode, setIsProMode] = useState<boolean>(true);
   const [loadingMarket, setLoadingMarket] = useState<boolean>(true);
   const [marketSnap, setMarketSnap] = useState<any>(null);
   const [loadingDebate, setLoadingDebate] = useState<boolean>(false);
   const [debateData, setDebateData] = useState<any>(null);
+  const [forecastData, setForecastData] = useState<any>(null);
 
   const fetchMarketData = async () => {
     setLoadingMarket(true);
@@ -66,6 +69,18 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
       // Handled via state
     } finally {
       setLoadingMarket(false);
+    }
+  };
+
+  const fetchForecastData = async () => {
+    try {
+      const res = await fetch(`/api/v1/prediction/kronos-forecast?symbol=${encodeURIComponent(symbol)}&horizon=medium`);
+      if (res.ok) {
+        const data = await res.json();
+        setForecastData(data);
+      }
+    } catch {
+      // Handled via state
     }
   };
 
@@ -90,6 +105,7 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
 
   useEffect(() => {
     fetchMarketData();
+    fetchForecastData();
     runAdversarialDebate();
   }, [symbol]);
 
@@ -123,7 +139,7 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-white">{symbol}</h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
-                {symbol.endsWith(".NS") ? "NSE India" : "US Equity"}
+                {symbol.endsWith(".NS") ? "NSE India" : symbol.includes("=") ? "Commodity / Energy" : "US Equity"}
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex items-center gap-1 ${
@@ -145,6 +161,26 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
         </div>
 
         <div className="flex items-center gap-6">
+          {/* Simple vs Pro Mode Toggle */}
+          <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 text-xs">
+            <button
+              onClick={() => setIsProMode(false)}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                !isProMode ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Simple
+            </button>
+            <button
+              onClick={() => setIsProMode(true)}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+                isProMode ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Pro Terminal
+            </button>
+          </div>
+
           <div className="text-right">
             <div className="text-3xl font-extrabold text-white">
               {loadingMarket ? (
@@ -169,52 +205,60 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
           <button
             onClick={() => {
               fetchMarketData();
+              fetchForecastData();
               runAdversarialDebate();
             }}
             disabled={loadingMarket || loadingDebate}
             className="p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 transition-all flex items-center gap-2 text-sm font-medium"
           >
             <RefreshCw className={`w-4 h-4 ${loadingMarket || loadingDebate ? "animate-spin" : ""}`} />
-            Refresh
           </button>
         </div>
       </div>
 
-      {/* 10 Terminal Navigation Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-800 text-sm">
-        {[
-          { id: "overview", label: "Overview", icon: Activity },
-          { id: "financials", label: "Financials (10-K)", icon: BarChart3 },
-          { id: "valuation", label: "3-Scenario DCF", icon: Scale },
-          { id: "technicals", label: "Technicals & MACD", icon: LineChart },
-          { id: "debate", label: "Bull vs Bear Debate", icon: Sparkles },
-          { id: "news", label: "News & Disclosures", icon: Globe },
-          { id: "forecast", label: "Probabilistic Forecast", icon: Brain },
-          { id: "risk", label: "Risk & Stress Tests", icon: Shield },
-          { id: "evidence", label: "Audit Provenance", icon: CheckCircle2 },
-          { id: "peers", label: "Peer Matrix", icon: Layers },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all ${
-                isActive
-                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Candlestick Chart with Kronos Forecast Cone */}
+      <InteractiveCandlestickChart
+        symbol={symbol}
+        forecastCandles={forecastData?.predicted_candles || []}
+        height={isProMode ? 440 : 360}
+      />
+
+      {/* Terminal Navigation Tabs */}
+      {isProMode && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-800 text-sm">
+          {[
+            { id: "overview", label: "Overview & Multi-Factor", icon: Activity },
+            { id: "financials", label: "Financials (10-K GAAP)", icon: BarChart3 },
+            { id: "valuation", label: "3-Scenario DCF", icon: Scale },
+            { id: "technicals", label: "Technicals & Indicators", icon: LineChart },
+            { id: "debate", label: "Bull vs Bear Debate", icon: Sparkles },
+            { id: "forecast", label: "Kronos Forecast", icon: Brain },
+            { id: "risk", label: "Risk & Stress Tests", icon: Shield },
+            { id: "evidence", label: "Audit Provenance", icon: CheckCircle2 },
+            { id: "peers", label: "Peer Matrix", icon: Layers },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all ${
+                  isActive
+                    ? "bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-sm"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Tab 1: Overview */}
-      {activeTab === "overview" && (
+      {(!isProMode || activeTab === "overview") && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-800">
             <p className="text-xs text-slate-400 font-medium">Market Capitalization</p>
@@ -317,7 +361,7 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
       )}
 
       {/* Tab 5: Bull vs Bear Debate */}
-      {activeTab === "debate" && (
+      {isProMode && activeTab === "debate" && (
         <div className="space-y-6">
           <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/30 to-purple-950/30 border border-blue-800/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
@@ -355,14 +399,6 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
                 {debateData?.bull_thesis?.summary ||
                   `Structural growth tailwinds, expanding gross margins, accelerating free cash flow conversion, and high ROIC provide strong multiple support against broader market volatility.`}
               </p>
-              <div className="space-y-2 pt-2">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Key Catalysts Cited:</p>
-                <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
-                  <li>Enterprise architectural transition with premium pricing power</li>
-                  <li>Expanding operational operating leverage in upcoming fiscal periods</li>
-                  <li>Institutional capital flows and low short-interest overhang</li>
-                </ul>
-              </div>
             </div>
 
             {/* Bear Researcher */}
@@ -380,29 +416,54 @@ export default function CompanyWorkspacePage({ params }: PageProps) {
                 {debateData?.bear_critique?.summary ||
                   `Valuation multiple reflects aggressive forward growth assumptions. Supply chain concentration risks, potential capex deceleration, and macro rate regime shifts present downside margin compression risks.`}
               </p>
-              <div className="space-y-2 pt-2">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Key Vulnerabilities Cited:</p>
-                <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
-                  <li>Elevated EV/EBITDA multiple vulnerable to earnings guidance normalization</li>
-                  <li>Concentration of revenue among top hyperscaler enterprise accounts</li>
-                  <li>Competitive margin erosion from alternative architectures</li>
-                </ul>
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Other tabs fallback display */}
-      {activeTab !== "overview" && activeTab !== "debate" && (
-        <div className="p-12 rounded-2xl bg-slate-900/40 border border-slate-800 text-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
-            <Activity className="w-6 h-6" />
+      {/* Tab 6: Kronos Forecast */}
+      {isProMode && activeTab === "forecast" && forecastData && (
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-emerald-400" />
+                  Kronos Probabilistic K-Line Trajectory
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Multi-horizon foundation model simulation with 95% uncertainty envelope.
+                </p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                {forecastData.predicted_trend}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
+                <p className="text-xs text-slate-400 font-semibold uppercase">Base Target Price</p>
+                <p className="text-2xl font-black text-white mt-1">
+                  ${forecastData.base_target_price?.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">Expected Path Horizon: {forecastData.forecast_steps} Days</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
+                <p className="text-xs text-emerald-400 font-semibold uppercase">Bull 95% Upper Bound</p>
+                <p className="text-2xl font-black text-emerald-300 mt-1">
+                  ${forecastData.bull_target_price?.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">Uncertainty Envelope Ceiling</p>
+              </div>
+              <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
+                <p className="text-xs text-rose-400 font-semibold uppercase">Bear 95% Lower Bound</p>
+                <p className="text-2xl font-black text-rose-300 mt-1">
+                  ${forecastData.bear_target_price?.toFixed(2)}
+                </p>
+                <p className="text-xs text-slate-500 mt-1">Uncertainty Envelope Floor</p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-lg font-bold text-white capitalize">{activeTab} Quantitative Module</h2>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Point-in-time calculation backed by live market adapters and SEC EDGAR GAAP filing normalizers for {symbol}.
-          </p>
         </div>
       )}
     </div>

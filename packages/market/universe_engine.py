@@ -105,7 +105,14 @@ class AssetUniverseEngine:
                 AssetSecurity("AVAX", "Avalanche", "CRYPTO", "Multi-Chain Subnets", "LARGE_CAP", "Global Crypto", "screened"),
                 AssetSecurity("LINK", "Chainlink", "CRYPTO", "Decentralized Oracle Network", "LARGE_CAP", "Global Crypto", "screened"),
                 AssetSecurity("DOT", "Polkadot", "CRYPTO", "Interoperability Protocol", "LARGE_CAP", "Global Crypto", "screened"),
-                AssetSecurity("NEAR", "NEAR Protocol", "CRYPTO", "Sharded Cloud Protocol", "LARGE_CAP", "Global Crypto", "screened"),
+            ],
+            "ENERGY_COMMODITIES": [
+                AssetSecurity("WTI", "Crude Oil WTI Futures", "ENERGY", "Crude Petroleum", "MEGA_CAP", "NYMEX", "deeply_analyzed"),
+                AssetSecurity("BRENT", "Brent Crude Oil Futures", "ENERGY", "Crude Petroleum", "MEGA_CAP", "ICE", "researched"),
+                AssetSecurity("NATGAS", "Natural Gas Futures", "ENERGY", "Natural Gas", "LARGE_CAP", "NYMEX", "researched"),
+                AssetSecurity("GOLD", "Gold Futures", "COMMODITY", "Precious Metals", "MEGA_CAP", "COMEX", "deeply_analyzed"),
+                AssetSecurity("SILVER", "Silver Futures", "COMMODITY", "Precious Metals", "LARGE_CAP", "COMEX", "screened"),
+                AssetSecurity("COPPER", "Copper Futures", "COMMODITY", "Industrial Metals", "LARGE_CAP", "COMEX", "screened"),
             ],
         }
         self.custom_universes: dict[str, list[AssetSecurity]] = {}

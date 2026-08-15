@@ -1,8 +1,8 @@
 <div align="center">
 
-# AlphaMind AI — Institutional Quantitative Research & Investment Operating System (v4.0)
+# AlphaMind AI — Institutional Quantitative Trading OS (v4.1)
 
-**An autonomous multi-agent intelligence platform integrating dialectical research debate, SEC EDGAR filing audit lineage, 7 mathematical portfolio optimization solvers, walk-forward out-of-sample backtesting, and realistic paper trading simulation.**
+**An autonomous multi-agent intelligence and paper trading operating system featuring real multi-asset feeds, Kronos foundation K-line forecasting, interactive candlestick charting, dialectical research debate, 7 portfolio solvers, and institutional risk management.**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg?style=flat&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -17,7 +17,14 @@
 
 ## 🌟 Executive Overview
 
-AlphaMind AI is an enterprise-grade AI investment research and portfolio management platform. Rather than relying on simplistic single-prompt language models or static price targets, AlphaMind AI executes structured quantitative algorithms and multi-agent dialectical debates across 11 specialized analysts, producing verified probabilistic distributions, SEC filing evidence lineage, and institutional risk-managed allocations.
+AlphaMind AI is an enterprise-grade AI financial intelligence and autonomous paper-trading platform. Built on strict reality-first principles, AlphaMind AI consumes live multi-asset market data (US Equities, Indian NSE Equities, Cryptocurrencies, Energy, and Commodities) with zero synthetic financial values.
+
+Key Architecture Highlights:
+- **Interactive Candlestick Terminal**: Full OHLCV rendering, Moving Averages (20/50/200), Bollinger Bands, RSI-14, MACD, and multi-timeframe switching (1D to MAX).
+- **Kronos Probabilistic K-Line Forecasting**: Autoregressive foundation candle path predictions with 95% uncertainty envelopes and 3-scenario targets (Bull, Base, Bear).
+- **Autonomous Paper Trader**: Closed-loop agent execution with dynamic slippage, spread modeling, commissions, and marked-to-market portfolio accounting.
+- **Model Scorecard & Strategy Learning**: Continuous validation of forecasts against realized ground-truth (MAE, RMSE, Directional Accuracy %, Brier score).
+- **Dialectical Multi-Agent Research**: Adversarial debates between Bull and Bear researchers moderated by Research Managers with SEC EDGAR citation lineage.
 
 ---
 

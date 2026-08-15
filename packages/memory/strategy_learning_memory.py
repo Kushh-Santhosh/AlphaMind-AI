@@ -61,6 +61,28 @@ class StrategyLearningMemory:
         }
         self._initialized = True
 
+    def record_trade_outcome(
+        self,
+        strategy_name: str,
+        symbol: str,
+        pnl_usd: float,
+        return_pct: float,
+        regime: str,
+        alpha_bps: float,
+        reflection: str,
+    ) -> None:
+        """Record trade execution outcome and reflection notes into learning memory."""
+        self.learned_patterns.append({
+            "pattern_id": f"rec_{len(self.learned_patterns) + 1:02d}",
+            "name": f"{strategy_name} on {symbol}",
+            "regime": regime,
+            "sample_count": 1,
+            "win_rate_pct": 100.0 if return_pct >= 0 else 0.0,
+            "avg_return_pct": return_pct,
+            "confidence_multiplier": 1.05 if return_pct >= 0 else 0.95,
+            "notes": reflection,
+        })
+
     def get_strategy_memory(self) -> dict[str, Any]:
         """Return memory patterns and analyst accuracy tracks."""
         return {
@@ -69,3 +91,8 @@ class StrategyLearningMemory:
             "total_historical_reflections": len(self.learned_patterns),
             "updated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
+
+
+# Singleton Global Strategy Learning Memory Instance
+strategy_learning_memory = StrategyLearningMemory()
+
