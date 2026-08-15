@@ -26,14 +26,14 @@ def test_rate_limiting_headers_on_successful_request():
 
 
 def test_auth_rate_limiting_policy_enforcement():
-    """Verify rate limiting enforcement on authentication endpoints (10 req/min limit)."""
-    # Send requests to consume auth limit
-    for _ in range(12):
+    """Verify rate limiting enforcement on authentication endpoints."""
+    from apps.backend.app.middleware.rate_limit import POLICY_LIMITS
+    limit = POLICY_LIMITS["auth"][0]
+    for _ in range(limit + 2):
         res = client.post(
             "/api/v1/auth/login",
             json={"email": "analyst@alphamind.ai", "password": "WrongPassword"},
         )
-    # The last request should be rate limited with HTTP 429
     assert res.status_code == 429
     data = res.json()
     assert data["policy"] == "auth"
@@ -41,8 +41,10 @@ def test_auth_rate_limiting_policy_enforcement():
 
 
 def test_heavy_ai_rate_limiting_policy_enforcement():
-    """Verify rate limiting enforcement on heavy AI endpoints (5 req/min limit)."""
-    for _ in range(7):
+    """Verify rate limiting enforcement on heavy AI endpoints."""
+    from apps.backend.app.middleware.rate_limit import POLICY_LIMITS
+    limit = POLICY_LIMITS["heavy_ai"][0]
+    for _ in range(limit + 2):
         res = client.get("/api/v1/reasoning/rec_01")
     assert res.status_code == 429
     data = res.json()

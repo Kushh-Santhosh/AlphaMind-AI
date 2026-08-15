@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 POLICY_LIMITS: dict[str, tuple[int, int]] = {
     # policy_name: (max_requests, window_seconds)
-    "auth": (10, 60),
-    "heavy_ai": (5, 60),
-    "forecast": (10, 60),
+    "auth": (20, 60),
+    "heavy_ai": (30, 60),
+    "forecast": (30, 60),
     "search": (60, 60),
     "general": (120, 60),
-    "sse_stream": (5, 60),
+    "sse_stream": (20, 60),
 }
 
 # In-Memory Sliding Window Fallback Storage: key -> list[timestamp_floats]

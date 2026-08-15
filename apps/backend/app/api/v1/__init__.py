@@ -3,9 +3,12 @@
 from apps.backend.app.api.v1.admin import router as admin_router
 from apps.backend.app.api.v1.analyst import router as analyst_router
 from apps.backend.app.api.v1.auth import router as auth_router
+from apps.backend.app.api.v1.backtest import router as backtest_v4_router
 from apps.backend.app.api.v1.briefings import router as briefings_router
 from apps.backend.app.api.v1.broker import router as broker_router
+from apps.backend.app.api.v1.compare import router as compare_router
 from apps.backend.app.api.v1.dashboards import router as dashboards_router
+from apps.backend.app.api.v1.debate import router as debate_router
 from apps.backend.app.api.v1.evaluation import router as evaluation_router
 from apps.backend.app.api.v1.health import router as health_router
 from apps.backend.app.api.v1.market import router as market_router
@@ -13,14 +16,17 @@ from apps.backend.app.api.v1.mission_control import router as mission_control_ro
 from apps.backend.app.api.v1.os_core import router as os_core_router
 from apps.backend.app.api.v1.portfolio import router as portfolio_router
 from apps.backend.app.api.v1.prediction import router as prediction_router
+from apps.backend.app.api.v1.providers import router as providers_router
 from apps.backend.app.api.v1.reasoning import router as reasoning_router
 from apps.backend.app.api.v1.research import router as research_router
+from apps.backend.app.api.v1.scanner import router as scanner_router
 from apps.backend.app.api.v1.simulation import router as simulation_router
 from apps.backend.app.api.v1.trading import (
     backtest_router,
     paper_trading_router,
     risk_router,
 )
+from apps.backend.app.api.v1.universe import router as universe_router
 from apps.backend.app.api.v1.v2_funds import router as v2_funds_router
 from apps.backend.app.api.v1.workspace import router as workspace_router
 
@@ -45,5 +51,11 @@ __all__ = [
     "v2_funds_router",
     "risk_router",
     "backtest_router",
+    "backtest_v4_router",
     "paper_trading_router",
+    "debate_router",
+    "universe_router",
+    "scanner_router",
+    "compare_router",
+    "providers_router",
 ]

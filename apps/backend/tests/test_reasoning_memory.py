@@ -16,10 +16,18 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from apps.backend.app.main import app
+from apps.backend.app.middleware.rate_limit import _IN_MEMORY_BUCKET
 from packages.os_core.chess_replay import ChessReplayEngine
 from packages.os_core.event_bus import EventBusManager, EventType, SystemEvent
 from packages.os_core.intelligence_memory import IntelligenceMemoryStore, ReasoningRecord
 from packages.os_core.unified_timeline import UnifiedImmutableTimeline
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limit():
+    _IN_MEMORY_BUCKET.clear()
+    yield
+    _IN_MEMORY_BUCKET.clear()
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
